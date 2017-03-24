@@ -8,7 +8,7 @@ defined('ADMIN_MODULE_NAME') or define('ADMIN_MODULE_NAME', 'modulpos.softcheck'
 class ModulPOSClient {
 	const MP_BASE_URL = 'https://service.modulpos.ru/api';
 	
-	public static function log($log_entry, $log_file="/var/log/modulpos.softcheck.log") {
+	public static function log($log_entry, $log_file="/var/log/php/modulpos.softcheck.log") {
         // Uncomment this line to enable debuging of module 
 		// file_put_contents($log_file, "\n".date('Y-m-d H:i:sP').' : '.$log_entry, FILE_APPEND);
 	}
@@ -34,6 +34,10 @@ class ModulPOSClient {
 			'http' => array(
 				'header' => $headers_string,
 				'method' => $method                
+			),
+			'https' => array(
+				'header' => $headers_string,
+				'method' => $method                
 			)
 		);
 		
@@ -41,14 +45,13 @@ class ModulPOSClient {
 			$options['http']['content'] = $data;
 		}
 		$context  = stream_context_create($options);
-		ModulPOSClient::log("Request: ".$method.' '.$url."\n$headers_string\n".$data);
-		$response = file_get_contents(ModulPOSClient::MP_BASE_URL.$url, FALSE, $context);
+		static::log("Request: ".$method.' '.$url."\n$headers_string\n".$data);
+		$response = file_get_contents(static::MP_BASE_URL.$url, FALSE, $context);
 		if ($response === FALSE) {
-			ModulPOSClient::log("Error:".var_export(error_get_last(), TRUE));
+			static::log("Error:".var_export(error_get_last(), TRUE));
 			return FALSE;
 		}
-		
-		ModulPOSClient::log("\nResponse:\n".var_export($response, TRUE));
+		static::log("\nResponse:\n".var_export($response, TRUE));
 		return json_decode($response, TRUE);
 	}
 	
@@ -66,7 +69,7 @@ class ModulPOSClient {
 	
 	private static function createCashDocument($order) {
 		$document = array(
-			'id' => ModulPOSClient::generateDocumentId(),
+			'id' => static::generateDocumentId(),
 			'docNum' => $order->getField('ACCOUNT_NUMBER'),
 			'docType' => 'SALE',
 			'status' => 'OPENED',
@@ -76,7 +79,7 @@ class ModulPOSClient {
 		$orderSum = 0.0;
 		$inventPositions = array();
 		foreach ($order->getBasket() as $basketItem) {
-			$inventPositions[] = ModulPOSClient::createItemPosition($basketItem);
+			$inventPositions[] = static::createItemPosition($basketItem);
 			$orderSum += $basketItem->getFinalPrice();
 		}
 		$document['inventPositions'] = $inventPositions;
@@ -85,10 +88,9 @@ class ModulPOSClient {
 
 		$moneyPositions = array();
 		foreach ($order->getPaymentCollection() as $paymentItem) {
-			$moneyPositions[] = ModulPOSClient::createMoneyPosition($paymentItem);
+			$moneyPositions[] = static::createMoneyPosition($paymentItem);
 		}
 		$document['moneyPositions'] = $moneyPositions;
-		
 		return $document;
 	}
 	
@@ -103,7 +105,7 @@ class ModulPOSClient {
             'measure' => 'pcs',
 			'type' => 'MAIN',
             'vatTag' => 1107, // TODO Need to map bitrix VAT values to VAT tags
-            'id' => ModulPOSClient::generateDocumentId() // system field
+            'id' => static::generateDocumentId() // system field
         );
 		return $position;
 	}
@@ -123,10 +125,10 @@ class ModulPOSClient {
         }
         $password =  Option::get(ADMIN_MODULE_NAME, 'password', '');
         $retailpoint_id = Option::get(ADMIN_MODULE_NAME, 'retailpoint_id', '');
-        $document = ModulPOSClient::createCashDocument($order);
+        $document = static::createCashDocument($order);
         $document_as_json = json_encode($document, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         $credentials = array('username'=>$login, 'password' => $password );
-        $response = ModulPOSClient::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'POST', $credentials, $document_as_json);
+        $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'POST', $credentials, $document_as_json);
         if ($response === FALSE) {        
             // TODO Show warning message "Unable to create external doc:".error_get_last()
         }

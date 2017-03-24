@@ -4,12 +4,14 @@ use Bitrix\Main\Application;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
-
+use Bitrix\Main\EventManager;
 
 Loc::loadMessages(__FILE__);
 
 class modulpos_softcheck extends CModule
 {
+    var $MODULE_ID = 'modulpos.softcheck';
+
     public function __construct()
     {
         $arModuleVersion = array();
@@ -30,17 +32,21 @@ class modulpos_softcheck extends CModule
         $this->PARTNER_URI = 'http://modulpos.ru';
     }
 
-    public function doInstall()
+    public function DoInstall()
     {
         ModuleManager::registerModule($this->MODULE_ID);
-        RegisterModuleDependences('sale', 'OnSaleOrderCanceled', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnCancel');
-        RegisterModuleDependences('sale', 'OnSaleOrderSaved', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnSave');
+        
+        $eventManager = \Bitrix\Main\EventManager::getInstance();
+        $eventManager->registerEventHandler('sale', 'OnSaleOrderCanceled', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnCancel');
+        $eventManager->registerEventHandler('sale', 'OnSaleOrderSaved', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnSave');
     }
 
-    public function doUninstall()
+    public function DoUninstall()
     {
         ModuleManager::unRegisterModule($this->MODULE_ID);
-        UnRegisterModuleDependences('sale', 'OnSaleOrderCanceled', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnCancel');
-        UnRegisterModuleDependences('sale', 'OnSaleOrderSaved', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnSave');
+        
+        $eventManager = \Bitrix\Main\EventManager::getInstance();
+        $eventManager->unRegisterEventHandler('sale', 'OnSaleOrderCanceled', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnCancel');
+        $eventManager->unRegisterEventHandler('sale', 'OnSaleOrderSaved', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnSave');
     }
 }
