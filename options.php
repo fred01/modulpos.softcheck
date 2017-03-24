@@ -75,7 +75,7 @@ $tabControl->begin();
         <td width="40%">
             <label for="password"><?=Loc::getMessage("REFERENCES_MODULPOS_PASS") ?>:</label>
         <td width="60%">
-            <input type="text"
+            <input type="password"
                    size="50"
                    maxlength="50"
                    name="password"

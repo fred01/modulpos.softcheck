@@ -10,7 +10,7 @@ Loc::loadMessages(__FILE__);
 
 class modulpos_softcheck extends CModule
 {
-    var $MODULE_ID = 'modulpos.softcheck';
+    var $MODULE_ID = 'modulpos.softcheck';                      
 
     public function __construct()
     {
@@ -32,7 +32,7 @@ class modulpos_softcheck extends CModule
         $this->PARTNER_URI = 'http://modulpos.ru';
     }
 
-    public function DoInstall()
+    function DoInstall()
     {
         ModuleManager::registerModule($this->MODULE_ID);
         
@@ -41,7 +41,7 @@ class modulpos_softcheck extends CModule
         $eventManager->registerEventHandler('sale', 'OnSaleOrderSaved', $this->MODULE_ID, '\Modulpos\SoftCheck\OrderStatusHandlers', 'OnSave');
     }
 
-    public function DoUninstall()
+    function DoUninstall()
     {
         ModuleManager::unRegisterModule($this->MODULE_ID);
         
