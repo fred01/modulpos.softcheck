@@ -23,8 +23,12 @@ class OrderStatusHandlers {
 		}
 		if ($is_new_order === TRUE && $requiredDeliveryExists && $requiredPaymentExists) {
 			ModulPOSClient::log("Found required payment and shipment. Creating external document...");
-			ModulPOSClient::createExternalDocument($order);
-			ModulPOSClient::log("external document created");
+			$result = ModulPOSClient::createExternalDocument($order);
+			if ($result) {
+				ModulPOSClient::log("external document created");
+			} else {
+				ModulPOSClient::log("Error creating external document");
+			}
 		}
 	}
 	

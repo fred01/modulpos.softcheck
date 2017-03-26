@@ -130,8 +130,10 @@ class ModulPOSClient {
         $credentials = array('username'=>$login, 'password' => $password );
         $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'POST', $credentials, $document_as_json);
         if ($response === FALSE) {        
-            // TODO Show warning message "Unable to create external doc:".error_get_last()
+            // TODO Show warning message "Unable to create external doc:".error_get_last(). Now just return FALSE
+			return FALSE;
         }
+		return TRUE;
     }
 }
 ?>
