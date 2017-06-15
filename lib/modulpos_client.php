@@ -10,7 +10,7 @@ class ModulPOSClient {
 	
 	public static function log($log_entry, $log_file="/var/log/php/modulpos.softcheck.log") {
         // Uncomment this line to enable debuging of module 
-		// file_put_contents($log_file, "\n".date('Y-m-d H:i:sP').' : '.$log_entry, FILE_APPEND);
+		@file_put_contents($log_file, "\n".date('Y-m-d H:i:sP').' : '.$log_entry, FILE_APPEND);
 	}
 	
 	private static function sendHttpRequest($url, $method, $auth_data, $data = '') {
@@ -82,6 +82,16 @@ class ModulPOSClient {
 			$inventPositions[] = static::createItemPosition($basketItem);
 			$orderSum += $basketItem->getFinalPrice();
 		}
+
+		foreach ($order->getShipmentCollection() as $shipment) {
+		    if (!$shipment->isSystem()) {
+                $deliveryPrice = $shipment->getField('PRICE_DELIVERY');
+                if ($deliveryPrice != 0) {
+                    $inventPositions[] = static::createDeliveryItem($deliveryPrice);
+                }
+            }
+        }
+
 		$document['inventPositions'] = $inventPositions;
 		$document['baseSum'] = $orderSum;
 		$document['actualSum'] = $orderSum;
@@ -104,12 +114,29 @@ class ModulPOSClient {
             'description' => '',
             'measure' => 'pcs',
 			'type' => 'MAIN',
-            'vatTag' => 1107, // TODO Need to map bitrix VAT values to VAT tags
+            'vatTag' => 0, // TODO Need to map bitrix VAT values to VAT tags
             'id' => static::generateDocumentId() // system field
         );
 		return $position;
 	}
-	
+
+	private static function createDeliveryItem($deliveryPrice) {
+        $position = array(
+            'inventCode' => NULL,
+            'name' => "Доставка",
+            'quantity' => 1,
+            'price' => $deliveryPrice,
+            'posSum' => $deliveryPrice,
+            'description' => "Доставка",
+            'measure' => 'pcs',
+            'type' => 'MAIN',
+            'vatTag' => 0, // TODO Need to map bitrix VAT values to VAT tags
+            'id' => static::generateDocumentId() // system field
+        );
+        return $position;
+
+    }
+
 	private static function createMoneyPosition($paymentItem) {
 		$position = array(
             'paymentType' => 'CASH', // Always cash, because we send only orders payed by cash
