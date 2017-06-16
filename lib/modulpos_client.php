@@ -88,6 +88,7 @@ class ModulPOSClient {
                 $deliveryPrice = $shipment->getField('PRICE_DELIVERY');
                 if ($deliveryPrice != 0) {
                     $inventPositions[] = static::createDeliveryItem($deliveryPrice);
+                    $orderSum += $deliveryPrice;
                 }
             }
         }
