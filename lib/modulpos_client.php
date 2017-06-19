@@ -154,7 +154,11 @@ class ModulPOSClient {
         $password =  Option::get(ADMIN_MODULE_NAME, 'password', '');
         $retailpoint_id = Option::get(ADMIN_MODULE_NAME, 'retailpoint_id', '');
         $document = static::createCashDocument($order);
-        $document_as_json = json_encode($document, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $json_encode_option = 0;
+        if (PHP_VERSION_ID >= 50400) {
+            $json_encode_option = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE;
+        }
+        $document_as_json = json_encode($document, $json_encode_option);
         $credentials = array('username'=>$login, 'password' => $password );
         $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'POST', $credentials, $document_as_json);
         if ($response === FALSE) {        
