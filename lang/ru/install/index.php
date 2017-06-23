@@ -1,5 +1,5 @@
 <?php
-$MESS['MODULPOS_SC_MODULE_NAME'] = 'Модуль.Чек';
-$MESS['MODULPOS_SC_MODULE_DESCRIPTION'] = 'Дополнение служит для передачи заказов в сервис Модуль.Касса';
-$MESS['MODULPOS_SC_MODULE_PARTNER_NAME'] = 'Модуль.Касса';
+$MESS['MODULPOS_SC_MODULE_NAME'] = 'МодульЗаказ';
+$MESS['MODULPOS_SC_MODULE_DESCRIPTION'] = 'Дополнение служит для передачи заказов в сервис МодульКасса';
+$MESS['MODULPOS_SC_MODULE_PARTNER_NAME'] = 'МодульКасса';
 ?>

@@ -1,13 +1,25 @@
 <?php
 namespace Modulpos\SoftCheck;
+defined('MODUL_SOFT_CHECK_MODULE_NAME') or define('MODUL_SOFT_CHECK_MODULE_NAME', 'modulpos.softcheck');
 
 use Modulpos\SoftCheck\ModulPOSClient;
+use Bitrix\Main\Config\Option;
+
 
 class OrderStatusHandlers {
-    const externalizeIfPaymentId = array('1'); //// ID of 'paynment by cash to courier'. TODO Make confugurable
-	const externalizeIfShipmentId = array('2'); //// ID of 'shipment by courier'. TODO Make confugurable
 
 	public static function OnSave(\Bitrix\Main\Event $event) {
+        $paymentSystemOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'paymentSystemIds', '1');
+        $paymentSystemIds = explode(',', $paymentSystemOption);
+
+        $deliverySystemOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'deliverySystemIds', '2');
+        $deliverySystemIds = explode(',', $deliverySystemOption);
+
+        ModulPOSClient::log("MODULE_NAME = ".MODUL_SOFT_CHECK_MODULE_NAME);
+        ModulPOSClient::log("paymentSystemOption = ".$paymentSystemOption);
+        ModulPOSClient::log("deliverySystemOption = ".$deliverySystemOption);
+
+
 	    $order = $event->getParameter("ENTITY");
  	    $old_values = $event->getParameter("VALUES");
         $orderNo = $order->getField('ACCOUNT_NUMBER');
@@ -25,8 +37,8 @@ class OrderStatusHandlers {
                 $orderDeliveryIds[] = $shipmentCollectionItem->getDelivery()->getId();
             }
 
-            $requiredPaymentExists = count(array_intersect($orderPaymentIds, static::externalizeIfPaymentId)) > 0;
-            $requiredDeliveryExists = count(array_intersect($orderDeliveryIds, static::externalizeIfShipmentId)) > 0;
+            $requiredPaymentExists = count(array_intersect($orderPaymentIds, $paymentSystemIds)) > 0;
+            $requiredDeliveryExists = count(array_intersect($orderDeliveryIds, $deliverySystemIds)) > 0;
 
             $orderShouldBeExternalized = $requiredDeliveryExists && $requiredPaymentExists;
 
@@ -40,8 +52,8 @@ class OrderStatusHandlers {
                 }
             } else {
                 ModulPOSClient::log("Order $orderNo is new, but not meet externalize conditions:");
-                ModulPOSClient::log("  Order paymentIds: ".var_export($orderPaymentIds, TRUE)."externalize if ".var_export(static::externalizeIfPaymentId, TRUE)." should be externalized: $requiredPaymentExists");
-                ModulPOSClient::log("  Order deliveryIds: ".var_export($orderDeliveryIds, TRUE)."externalize if ".var_export(static::externalizeIfShipmentId, TRUE)." should be externalized: $requiredDeliveryExists");
+                ModulPOSClient::log("  Order paymentIds: ".var_export($orderPaymentIds, TRUE)."externalize if ".var_export($paymentSystemIds, TRUE)." should be externalized: ". ($requiredPaymentExists?"TRUE":"FALSE"));
+                ModulPOSClient::log("  Order deliveryIds: ".var_export($orderDeliveryIds, TRUE)."externalize if ".var_export($deliverySystemIds, TRUE)." should be externalized: ". ($requiredDeliveryExists?"TRUE":"FALSE"));
             }
         } else {
             ModulPOSClient::log("Order $orderNo not new, skipping");
@@ -49,11 +61,12 @@ class OrderStatusHandlers {
 	}
 	
 	public static function OnCancel(\Bitrix\Main\Event $event) {
-		$order = $event->getParameter("ENTITY");
-		$orderNo = $order->getField('ACCOUNT_NUMBER');
-		ModulPOSClient::log("Canceling document: $orderNo");
-		ModulPOSClient::deleteExternalDocument($orderNo);
-		ModulPOSClient::log("OnCancel event completed");
+// Not implemented yet.
+//		$order = $event->getParameter("ENTITY");
+//		$orderNo = $order->getField('ACCOUNT_NUMBER');
+//		ModulPOSClient::log("Canceling document: $orderNo");
+//		ModulPOSClient::deleteExternalDocument($orderNo);
+//		ModulPOSClient::log("OnCancel event completed");
 	}
 }
 ?>
