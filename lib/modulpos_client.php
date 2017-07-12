@@ -10,11 +10,11 @@ class ModulPOSClient {
 
     public static function log($log_entry, $log_file = null) {
         if ($log_file == null) {
-            $log_file = $_SERVER["DOCUMENT_ROOT"].BX_PERSONAL_ROOT.'/tmp/modulpos.logs/modulpos.cashbox.log';
+            $log_file = $_SERVER["DOCUMENT_ROOT"].BX_PERSONAL_ROOT.'/tmp/modulpos.logs/modulpos.softcheck.log';
             CheckDirPath($_SERVER["DOCUMENT_ROOT"].BX_PERSONAL_ROOT.'/tmp/modulpos.logs/');
         }
 
-        file_put_contents($log_file, "\n".date('Y-m-d H:i:sP').' : '.$log_entry, FILE_APPEND);
+        @file_put_contents($log_file, "\n".date('Y-m-d H:i:sP').' : '.$log_entry, FILE_APPEND);
     }
 	
 	private static function sendHttpRequest($url, $method, $auth_data, $data = '') {
@@ -114,9 +114,13 @@ class ModulPOSClient {
 	}
 	
 	private static function createItemPosition($basketItem) {
+        $itemName = $basketItem->getField('NAME');
+        if (SITE_CHARSET == 'windows-1251') {
+            $itemName = mb_convert_encoding($itemName, "utf-8", "windows-1251");
+        }
 		$position = array(            
             'inventCode' => $basketItem->getProductId(),
-            'name' => $basketItem->getField('NAME'),
+            'name' => $itemName,
             'quantity' => $basketItem->getQuantity(),
             'price' => $basketItem->getPrice(),
             'posSum' => $basketItem->getFinalPrice(),

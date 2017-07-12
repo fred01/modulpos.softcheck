@@ -38,7 +38,7 @@ if ((!empty($save) || !empty($restore)) && $request->isPost() && check_bitrix_se
         Option::delete(MODUL_SOFT_CHECK_MODULE_NAME, "password");
         Option::delete(MODUL_SOFT_CHECK_MODULE_NAME, "retailpoint_info");
         CAdminMessage::showMessage(array(
-            "MESSAGE" => "Связь с розничной точкой удалена",
+            "MESSAGE" => Loc::getMessage("REFERENCES_OPTIONS_ASSOCIATION_REMOVED"),
             "TYPE" => "OK"
         ));
     } else {
@@ -53,10 +53,10 @@ if ((!empty($save) || !empty($restore)) && $request->isPost() && check_bitrix_se
                 Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "password", $password);
                 Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "retailpoint_id", $retailpoint_id);
                 Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "retailpoint_info", $retailpoint_info);
-                CAdminMessage::showMessage(array("MESSAGE" => "Успешно связяно с розничной точкой: $retailpoint_info" , "TYPE" => "OK"));
+                CAdminMessage::showMessage(array("MESSAGE" => Loc::getMessage("REFERENCES_OPTIONS_ASSOCIATION_CREATED").$retailpoint_info , "TYPE" => "OK"));
             } else {
-                CAdminMessage::showMessage("Ошибка связи с сервисом МодульКасса. Проверьте корректность введенных данных");
-                ModulPOSClient::log("Ошибка связи с сервисом МодульКасса. Проверьте корректность введенных данных");
+                CAdminMessage::showMessage(Loc::getMessage("REFERENCES_OPTIONS_ASSOC_ERROR"));
+                ModulPOSClient::log("Error connection to fnservice.");
             }
         }
 
@@ -79,12 +79,12 @@ $tabControl->begin();
     ?>
             <tr>
                 <td width="40%">
-                    <label for="login">Связано с розничной точкой <?=$retailpoint_info?></label>
+                    <label for="login"><?=Loc::getMessage("REFERENCES_MODULPOS_LINKED_WITH_RP") ?><?=$retailpoint_info?></label>
                 <td width="60%">
                     <input type="submit"
                            name="restore"
-                           value="Удалить связь"
-                           title="Удалить связь"
+                           value="<?=Loc::getMessage("REFERENCES_MODULPOS_REMOVE_ASSOCIATION") ?>"
+                           title="<?=Loc::getMessage("REFERENCES_MODULPOS_REMOVE_ASSOCIATION") ?>"
                            class="adm-btn-save"
                     />
 
@@ -130,7 +130,7 @@ $tabControl->begin();
     </tr>
     <? endif; ?>
     <tr>
-        <td>Отметье платежные системы,<br> при оплате которыми <br>заказы будут передаваться в МодульКассу</td>
+        <td><?=Loc::getMessage("REFERENCES_MODULPOS_SELECT_PAYSYSTEMS") ?></td>
         <td>
             <?php
                 $paymentSystemOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'paymentSystemIds', '1');
@@ -143,7 +143,7 @@ $tabControl->begin();
     </tr>
 
     <tr>
-        <td>Отметье службы,<br> при доставке которыми <br>заказы будут передаваться в МодульКассу</td>
+        <td><?=Loc::getMessage("REFERENCES_MODULPOS_SELECT_DELIVERYSYSTEMS")?></td>
         <td>
             <?php
             $delivetySystems = DeliveryManager::getActiveList();
