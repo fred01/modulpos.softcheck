@@ -105,11 +105,6 @@ class ModulPOSClient {
 		$document['baseSum'] = $orderSum;
 		$document['actualSum'] = $orderSum;
 
-		$moneyPositions = array();
-		foreach ($order->getPaymentCollection() as $paymentItem) {
-			$moneyPositions[] = static::createMoneyPosition($paymentItem);
-		}
-		$document['moneyPositions'] = $moneyPositions;
 		return $document;
 	}
 	
