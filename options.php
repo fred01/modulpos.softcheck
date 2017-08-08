@@ -62,6 +62,7 @@ if ((!empty($save) || !empty($restore)) && $request->isPost() && check_bitrix_se
 
         Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "paymentSystemIds", implode(',', $request->getPost('payment')));
         Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "deliverySystemIds", implode(',', $request->getPost('delivery')));
+        Option::set(MODUL_SOFT_CHECK_MODULE_NAME, "orderStatus", $request->getPost('order_status'));
     }
 }
 
@@ -141,7 +142,6 @@ $tabControl->begin();
             <?php endforeach; ?>
         </td>
     </tr>
-
     <tr>
         <td><?=Loc::getMessage("REFERENCES_MODULPOS_SELECT_DELIVERYSYSTEMS")?></td>
         <td>
@@ -155,6 +155,21 @@ $tabControl->begin();
             <?php endforeach; ?>
         </td>
     </tr>
+
+    <tr>
+        <td><?=Loc::getMessage("REFERENCES_MODULPOS_SELECT_ORDERSTATUS")?></td>
+        <td>
+            <select name="order_status">
+            <?php
+                $saleStatuses = CSaleStatus::GetList (array(), array("LID" => "ru"));
+                $currentSaleStatusId = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'orderStatus', 'N');
+                while($res = $saleStatuses->Fetch()):?>
+                    <option value="<?=$res['ID']?>" <?=($currentSaleStatusId == $res['ID']?'selected':'')?>><?=$res['NAME']?></option>
+                <?php endwhile; ?>
+            </select>
+        </td>
+    </tr>
+
 
     <?php
     $tabControl->buttons();

@@ -151,6 +151,25 @@ class ModulPOSClient {
         );
         return $position;
     }
+
+    public static function existsExternalDoc($order) {
+        $login =  Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'login', '#empty#');
+        if ($login == '#empty#') {
+            ModulPOSClient::log("modulpos.softcheck module not configured properly. Set login, password and retail point id in module settings");
+            return false; // TODO: Show warning "Modulpos not configured properly"
+        }
+        $password =  Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'password', '');
+        $retailpoint_id = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'retailpoint_id', '');
+        $credentials = array('username'=>$login, 'password' => $password );
+        $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'GET', $credentials);
+        foreach ($response as $item) {
+            if ($item[docNum] === $order->getField('ACCOUNT_NUMBER')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static function createExternalDocument($order) {
         $login =  Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'login', '#empty#');
         if ($login == '#empty#') {

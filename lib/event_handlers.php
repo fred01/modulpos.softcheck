@@ -15,9 +15,12 @@ class OrderStatusHandlers {
         $deliverySystemOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'deliverySystemIds', '2');
         $deliverySystemIds = explode(',', $deliverySystemOption);
 
+        $neededOrderStatusOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'orderStatus', 'N');
+
         ModulPOSClient::log("MODULE_NAME = ".MODUL_SOFT_CHECK_MODULE_NAME);
         ModulPOSClient::log("paymentSystemOption = ".$paymentSystemOption);
         ModulPOSClient::log("deliverySystemOption = ".$deliverySystemOption);
+        ModulPOSClient::log("neededOrderStatusOption = ".$neededOrderStatusOption);
 
 
 	    $order = $event->getParameter("ENTITY");
@@ -25,7 +28,19 @@ class OrderStatusHandlers {
         $orderNo = $order->getField('ACCOUNT_NUMBER');
         $is_new_order = $event->getParameter("IS_NEW");
 
-        if ($is_new_order === TRUE) {
+        $oldStatus = $old_values["STATUS_ID"];
+        $currentStatus = $order->getField('STATUS_ID');
+
+        ModulPOSClient::log("is_new = ".$is_new_order);
+        ModulPOSClient::log("oldStatus = ".$oldStatus);
+        ModulPOSClient::log("currentStatus = ".$currentStatus);
+
+        if (($is_new_order === TRUE
+                and $neededOrderStatusOption === $currentStatus)
+            or ($is_new_order === FALSE
+                and $oldStatus !== $currentStatus
+                and $neededOrderStatusOption === $currentStatus
+                and !ModulPOSClient::existsExternalDoc($order))) {
 
             $orderPaymentIds = array();
             $orderDeliveryIds = array();
@@ -56,7 +71,7 @@ class OrderStatusHandlers {
                 ModulPOSClient::log("  Order deliveryIds: ".var_export($orderDeliveryIds, TRUE)."externalize if ".var_export($deliverySystemIds, TRUE)." should be externalized: ". ($requiredDeliveryExists?"TRUE":"FALSE"));
             }
         } else {
-            ModulPOSClient::log("Order $orderNo not new, skipping");
+            ModulPOSClient::log("Order $orderNo not new or status is incorrect or order is exists, skipping");
         }
 	}
 	
