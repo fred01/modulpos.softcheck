@@ -15,7 +15,7 @@ class OrderStatusHandlers {
         $deliverySystemOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'deliverySystemIds', '2');
         $deliverySystemIds = explode(',', $deliverySystemOption);
 
-        $neededOrderStatusOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'orderStatus', 'N');
+        $neededOrderStatusOption = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'orderStatus', '');
 
         ModulPOSClient::log("MODULE_NAME = ".MODUL_SOFT_CHECK_MODULE_NAME);
         ModulPOSClient::log("paymentSystemOption = ".$paymentSystemOption);
@@ -35,7 +35,9 @@ class OrderStatusHandlers {
         ModulPOSClient::log("oldStatus = ".$oldStatus);
         ModulPOSClient::log("currentStatus = ".$currentStatus);
 
-        if (($is_new_order === TRUE
+        if (($is_new_order === TRUE and $neededOrderStatusOption === '')
+            or
+            ($is_new_order === TRUE
                 and $neededOrderStatusOption === $currentStatus)
             or ($is_new_order === FALSE
                 and $oldStatus !== $currentStatus
