@@ -161,9 +161,10 @@ class ModulPOSClient {
         $password =  Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'password', '');
         $retailpoint_id = Option::get(MODUL_SOFT_CHECK_MODULE_NAME, 'retailpoint_id', '');
         $credentials = array('username'=>$login, 'password' => $password );
-        $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/shift/:external/cashdoc", 'GET', $credentials);
-        foreach ($response as $item) {
-            if ($item[docNum] === $order->getField('ACCOUNT_NUMBER')) {
+        $docNum = $order->getField('ACCOUNT_NUMBER');
+        $response = static::sendHttpRequest("/v1/retail-point/$retailpoint_id/cashdocs?q=docNum==$docNum", 'GET', $credentials);
+        foreach ($response["data"] as $item) {
+            if ($item["docNum"] === $docNum) {
                 return true;
             }
         }
